@@ -1,0 +1,77 @@
+#Libraries
+library(tidyverse)
+library(rvest)
+library(xml2)
+library(stringr)
+library(data.table)
+
+imbd_data = data.frame(Movie_Name = character(),
+                       Movie_Gross = character(), 
+                       Movie_Metascore = character(),
+                       Movie_Rating = character(),
+                       Movie_length = character(),
+                       Movie_Votes = character(),
+                       Movie_summary = character(),
+                       Movie_Year = character(),
+                        stringsAsFactors=FALSE)
+
+#Loop Statement
+for (i in seq(from = 1, to = 50, by = 10)){
+  website <- paste0('https://www.imdb.com/search/keyword/?keywords=action-hero&ref_=kw_nxt&sort=moviemeter,asc&mode=detail&page=',i,"&ref_=adv_nxt")
+  page <- read_html(website)
+  
+  #Movie Title
+  Movie_Name <-  page %>% 
+    html_nodes(".lister-item-header a") %>%
+    html_text() 
+  
+  #Movie Year
+  Movie_Year <- page %>% 
+    html_nodes(".text-muted.unbold") %>%
+    html_text()
+  
+  #Movie Gross
+  Movie_Gross <- page %>%
+    html_nodes(".ghost~ .text-muted+ span") %>%
+    html_text()
+  
+  #Movie Length
+  Movie_length <- page %>%
+    html_nodes(".runtime") %>%
+    html_text()
+  
+  
+  #Movie Rating
+  Movie_Rating <- page %>%
+    html_nodes(".ratings-imdb-rating strong") %>%
+    html_text() 
+  
+  #Movie Summary
+  Movie_summary <- page %>%
+    html_nodes(".ratings-bar+ p") %>%
+    html_text()
+  
+  ##Movie Metascore
+  Movie_Metascore <- page %>%
+    html_nodes(".metascore") %>%
+    html_text()
+  
+  #Movie Votes
+  Movie_Votes <- page %>%
+    html_nodes(".text-muted+ span:nth-child(2)") %>%
+    html_text()
+  
+  imbd_data <- rbind(imbd_data, as.data.frame(cbind(Movie_Gross,
+                                                        Movie_length,
+                                                        Movie_Metascore,
+                                                        Movie_Name,
+                                                        Movie_Rating,
+                                                        Movie_Votes,
+                                                        Movie_summary,
+                                                        Movie_Year)))
+} 
+  
+  Action_movies = data.frame( Movie_Name, Movie_Year, Movie_length, Movie_Rating, Movie_Votes, Movie_Metascore, Movie_summary, stringsAsFactors = FALSE)
+  
+  
+                                                        
